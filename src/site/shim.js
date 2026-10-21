@@ -96,8 +96,10 @@
       }, () => {});
     };
     let myPres = null, hb = null;
-    const writePres = () => { if (!myPres) return Promise.resolve(); return peersC.doc(TAB).set({ p: JSON.stringify(myPres), cid: CID, ct: Date.now() }).catch(() => {}); };
+    const writePres = () => { if (!myPres || document.hidden) return Promise.resolve(); return peersC.doc(TAB).set({ p: JSON.stringify(myPres), cid: CID, ct: Date.now() }).catch(() => {}); };
     try { addEventListener('pagehide', () => { try { peersC.doc(TAB).delete(); } catch (e) {} }); } catch (e) {}
+    // Pålogget = appen er åpen på skjermen. Skjult fane eller app i bakgrunnen regnes som borte.
+    try { document.addEventListener('visibilitychange', () => { try { if (document.hidden) peersC.doc(TAB).delete().catch(() => {}); else writePres(); } catch (e) {} }); } catch (e) {}
     room = {
       emit: (topic, data) => ev.add({ tp: String(topic), d: JSON.stringify(data === undefined ? null : data), by: CID, tab: TAB, ct: Date.now() }),
       on: (topic, fn) => { (handlers[topic] = handlers[topic] || []).push(fn); startEv(); return () => { handlers[topic] = (handlers[topic] || []).filter((f) => f !== fn); }; },
