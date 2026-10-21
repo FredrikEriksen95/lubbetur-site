@@ -1410,9 +1410,21 @@ window.LubArcade = (function () {
     T.order.forEach((nm, i) => { const r = h('div', 'tur-r' + (nm === who() ? ' me' : '')); const nmw = h('div', 'tn'); nmw.append(h('b', '', nm), h('small', '', Math.min(T.cnt[nm], TUR_K) + ' av ' + TUR_K + ' grener teller' + (T.cnt[nm] > TUR_K ? ' (' + T.cnt[nm] + ' spilt)' : ''))); r.append(h('span', 'pos', medal[i] && T.tot[nm] > 0 ? medal[i] : String(i + 1)), nmw, h('span', 'pts', String(T.tot[nm]).replace('.', ',') + ' p')); list.append(r); });
     p.append(list);
     if (n) {
-      const det = h('details', 'tur-d'); det.append(h('summary', '', 'Se grenene'));
-      TUR_CATS.forEach(([cat]) => { const c = T.per[cat]; if (!c) return; const g = h('div', 'rec-g'); g.append(h('b', '', c.nm)); if (c.alone) g.append(h('small', 'fine', 'Gir poeng når en til har spilt')); c.rows.forEach((r, i) => { const d = h('div', 'rec-r' + (r.counts ? '' : ' nc')); d.append(h('span', 'pos', String(i + 1)), h('span', 'nm', r.name), h('span', 'v', r.label + (c.alone ? '' : ' · ' + String(r.p).replace('.', ',') + ' p'))); g.append(d); }); det.append(g); });
-      p.append(det);
+      // Grenene: trykk på en gren for å se alles skår
+      p.append(h('span', 'lbl', 'Grenene – trykk for å se alle'));
+      const gg = h('div', 'tur-gg'); const box = h('div', 'tur-gd');
+      const showCat = (cat) => {
+        box.textContent = ''; if (UI.turOpen !== cat) { UI.turOpen = null; [...gg.children].forEach((b) => b.classList.remove('on')); return; }
+        const c = T.per[cat], people = OPT.people || [];
+        const hd = h('div', 'tur-gh'); hd.append(h('b', '', c.nm), h('small', '', c.alone ? 'Gir poeng når minst to har spilt' : 'Beste får ' + people.length + ' poeng')); box.append(hd);
+        c.rows.forEach((r, i) => { const d = h('div', 'rec-r' + (r.counts || c.alone ? '' : ' nc') + (r.name === who() ? ' me' : '')); d.append(h('span', 'pos', ['🥇', '🥈', '🥉'][i] || String(i + 1)), h('span', 'nm', r.name), h('span', 'v', r.label + (c.alone ? '' : ' · ' + String(r.p).replace('.', ',') + ' p'))); box.append(d); });
+        people.filter((n) => !c.rows.some((r) => r.name === n)).forEach((n) => { const d = h('div', 'rec-r nc'); d.append(h('span', 'pos', '–'), h('span', 'nm', n), h('span', 'v', 'ikke spilt')); box.append(d); });
+      };
+      TUR_CATS.forEach(([cat]) => { const c = T.per[cat]; if (!c) return; const top = c.rows[0];
+        const b = h('button', 'tur-gb' + (UI.turOpen === cat ? ' on' : '')); b.type = 'button'; b.append(h('b', '', c.nm), h('span', '', top.name + ' · ' + top.label), h('small', '', c.rows.length + (c.rows.length === 1 ? ' har spilt' : ' har spilt')));
+        b.onclick = () => { fx.tap(); UI.turOpen = UI.turOpen === cat ? null : cat; [...gg.children].forEach((x) => x.classList.toggle('on', x === b && UI.turOpen === cat)); showCat(cat); if (UI.turOpen) setTimeout(() => { try { box.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {} }, 30); };
+        gg.append(b); });
+      p.append(gg, box); if (UI.turOpen && T.per[UI.turOpen]) showCat(UI.turOpen);
     }
     const adm = h('button', 'tur-adm', 'Nullstill (admin)'); adm.type = 'button';
     adm.onclick = () => {

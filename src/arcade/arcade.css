@@ -952,3 +952,14 @@
 .tur-r .tn { display: grid; } .tur-r .tn small { color: #8fa6ae; font-size: 11px; }
 .tur .rec-r.nc { opacity: .5; }
 .ah-ver { text-align: center; opacity: .5; font-size: 11px; }
+
+.tur-gg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.tur-gb { display: grid; gap: 2px; text-align: left; padding: 10px 12px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); color: #e8edef; cursor: pointer; min-width: 0; font: inherit; }
+.tur-gb b { font-family: var(--serif); font-size: 15px; letter-spacing: .02em; }
+.tur-gb span { font-size: 12px; color: #ffd84d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tur-gb small { font-size: 11px; color: #8fa6ae; }
+.tur-gb.on { border-color: #ffd84d; background: rgba(255,214,77,.1); }
+.tur-gd:empty { display: none; }
+.tur-gd { display: grid; gap: 4px; padding: 10px 12px; background: rgba(0,0,0,.25); border-left: 3px solid #ffd84d; }
+.tur-gh { display: grid; gap: 2px; margin-bottom: 4px; } .tur-gh b { font-family: var(--serif); font-size: 17px; } .tur-gh small { color: #8fa6ae; font-size: 12px; }
+.tur-gd .rec-r.me .nm { color: #ffd84d; }
