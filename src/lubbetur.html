@@ -11133,7 +11133,7 @@ window.LubArcade = (function () {
     timers.push(setTimeout(end, 16000));
   }
 
-  try { window.LubArcade && LubArcade.mount({ el: $('arcadeSec'), people: PEOPLE, who: () => curWho, setWho: (n) => pickWho(n), openPacks: window.__LUB_GAMES ? null : () => { try { window.LubViews && LubViews.show('kort'); } catch (e) {} setTimeout(() => { try { $('packBtn').click(); } catch (e) {} }, 180); } }); } catch (e) {}
+  try { window.LubArcade && LubArcade.mount({ el: $('arcadeSec'), people: PEOPLE, who: () => curWho, setWho: (n) => pickWho(n), openPacks: window.__LUB_GAMES ? () => { setTimeout(() => { try { $('packBtn').click(); } catch (e) {} }, 120); } : null }); } catch (e) {}
 
 
   // ---------- Meny og visninger: én del av appen om gangen ----------
