@@ -11308,7 +11308,6 @@ window.LubArcade = (function () {
       if (el.matches('header')) return '*';
       const id = el.id, t = h2(el);
       const live = revealed();
-      if (live && id === 'liveSec') return 'bp';
       if (el.classList.contains('board') || el.classList.contains('reveal') || ['liveSec', 'countSec', 'lockSec', 'wallSec', 'kortTeaser'].includes(id) || t === 'Akkurat nå') return 'hjem';
       if (t === 'Programmet') return live ? 'hjem' : 'program';
       if (live && t === 'Bookinger') return 'hjem';
