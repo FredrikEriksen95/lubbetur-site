@@ -786,6 +786,13 @@
 .psc-letter.drag { cursor: grabbing; transition: none; transform: rotate(0) scale(1.12); box-shadow: 0 14px 20px rgba(0,0,0,.45); }
 .psc-letter.sel { outline: 3px solid #ffe36e; outline-offset: 1px; transform: rotate(0) scale(1.06); }
 .psc-letter.gold { background: linear-gradient(135deg, #fff6c8, #f2c230 55%, #d9a514); border-color: #8a6410; box-shadow: 0 0 12px rgba(255,210,60,.85), 0 3px 5px rgba(0,0,0,.3); }
+.psc-letter.legend { background: linear-gradient(120deg, #ffd6f5, #c9b8ff 25%, #9ee9ff 50%, #b9ffcf 75%, #fff1a8); background-size: 300% 300%; border-color: #6b3fb5; box-shadow: 0 0 18px rgba(190,120,255,.95), 0 0 34px rgba(110,220,255,.55), 0 3px 5px rgba(0,0,0,.3); animation: psclg 2.4s linear infinite; }
+.psc-letter.legend.fall { animation: pscfall .55s cubic-bezier(.35,1.4,.55,1) backwards, psclg 2.4s linear infinite; }
+.psc-letter.legend .lgstar { position: absolute; right: 3px; bottom: 1px; font-style: normal; font-size: 15px; color: #fff; text-shadow: 0 0 6px #b04dff, 0 0 2px #000; }
+.psc-letter.legend .adr em { color: #4a1d8f; font-weight: 800; }
+.psc-bubble.legend { color: #7a2fd6; text-shadow: 0 0 8px rgba(255,255,255,.95); }
+.psc-stage.legendrush::after { content: ""; position: absolute; inset: 0; z-index: 280; pointer-events: none; background: radial-gradient(circle at 50% 45%, rgba(200,140,255,.75), rgba(120,220,255,.35) 40%, transparent 70%); animation: pscrush 1.6s ease-out forwards; }
+@keyframes psclg { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
 .psc-letter.gold .glint { position: absolute; top: -20%; bottom: -20%; width: 18px; left: -30px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.9), transparent); transform: skewX(-20deg); animation: pscglint 1.8s ease-in-out infinite; pointer-events: none; }
 @keyframes pscglint { 60%, 100% { left: 115%; } }
 /* Knapper */

@@ -2569,12 +2569,12 @@ window.LubArcade = (function () {
       it.el.style.left = it.x + 'px'; it.el.style.top = it.y + 'px'; it.el.style.zIndex = ++zTop;
     }
     function bubble(t, cls, x, y, ms) { const b = h('span', 'psc-bubble' + (cls ? ' ' + cls : ''), t); b.style.left = Math.max(4, Math.min(W - 150, x)) + 'px'; b.style.top = y + 'px'; stage.append(b); setTimeout(() => b.remove(), ms || 1000); }
-    function newItem(cc, card, tx, ty, delay, gold) {
+    function newItem(cc, card, tx, ty, delay, gold, legend) {
       const a = pscAddress(cc);
-      const el = h('div', 'psc-letter' + (card ? ' card' : '') + (gold ? ' gold' : '')); el.dataset.cc = cc;
+      const el = h('div', 'psc-letter' + (card ? ' card' : '') + (gold ? ' gold' : '') + (legend ? ' legend' : '')); el.dataset.cc = cc;
       el.innerHTML = (card ? '<i class="pic"></i>' : '') + '<i class="pm"></i><span class="stampf">' + flagSvg(cc) + '</span><span class="adr"><em></em><b></b><b></b></span>';
       const ad = el.querySelector('.adr'); ad.children[0].textContent = a.name; ad.children[1].textContent = a.city; ad.children[2].textContent = a.land;
-      const it = { el, cc, gold: !!gold, rot: (Math.random() * 14 - 7), x: tx, y: ty }; if (gold) el.append(h('i', 'glint'));
+      const it = { el, cc, gold: !!gold, legend: !!legend, rot: (Math.random() * 14 - 7), x: tx, y: ty }; if (gold || legend) el.append(h('i', 'glint')); if (legend) { el.append(h('i', 'lgstar', '★')); el.querySelector('.adr').children[0].textContent = 'Legendarisk post'; }
       el.style.setProperty('--rot', it.rot + 'deg'); el.style.left = tx + 'px'; el.style.top = ty + 'px'; el.style.zIndex = ++zTop;
       el.style.setProperty('--fx', (chute.offsetLeft + 10 - tx) + 'px'); el.style.setProperty('--fy', (chute.offsetTop - ty) + 'px');
       el.style.animationDelay = (delay || 0) + 'ms'; el.classList.add('fall');
@@ -2597,7 +2597,9 @@ window.LubArcade = (function () {
       if (lack.length && Math.random() < .7) { const tot = lack.reduce((t, k) => t + need[k], 0); let r = Math.random() * tot; cc = lack.find((k) => (r -= need[k]) < 0) || lack[0]; }
       else cc = act[rnd(act.length)];
       const [x, y] = spot(false);
-      const g = sorted >= 8 && Math.random() < .02; newItem(cc, !g && Math.random() < .2, x, y, 0, g); if (g) L('stab', [1318.5, 1568, 2093], .35, .05);
+      // Legendarisk post: svært sjelden (ca. 1 av 250 brev etter 25 sorterte, maks én om gangen). Sorteres den, ryddes hele bordet.
+      if (sorted >= 25 && !items.some((x) => x.legend) && Math.random() < .004) { newItem(cc, false, x, y, 0, false, true); L('stab', [1046.5, 1318.5, 1568, 2093, 2637], .5, .07); L('buzz', [40, 40, 40, 40, 160]); bubble('Legendarisk post!', 'big legend', x - 20, y - 26, 1500); }
+      else { const g = sorted >= 8 && Math.random() < .02; newItem(cc, !g && Math.random() < .2, x, y, 0, g); if (g) L('stab', [1318.5, 1568, 2093], .35, .05); }
       L('noise', .18, 'bandpass', 1400, 500, .01, .12, 1.2); setTimeout(() => L('pop', false), 380);
       check();
     }
@@ -2627,6 +2629,7 @@ window.LubArcade = (function () {
       const up = (e) => {
         if (!off) return; const o = off; off = null; if (dragIt === it) dragIt = null; if (it.gone) return; it.el.classList.remove('drag'); sacks.forEach((s) => s.el.classList.remove('hover'));
         const moved = p0 ? Math.hypot(e.clientX - p0[0], e.clientY - p0[1]) : 99;
+        if (it.legend && (moved <= 8 || sackAt(e.clientX, e.clientY))) { legendClear(it); return; }
         if (moved <= 8) { autoSend(it); return; }
         const hit = sackAt(e.clientX, e.clientY);
         if (hit) { tryDrop(it, hit); return; }
@@ -2637,7 +2640,18 @@ window.LubArcade = (function () {
     function moveTo(it, x, y) { it.x = clampX(x); it.y = clampY(y); it.el.style.left = it.x + 'px'; it.el.style.top = it.y + 'px'; it.el.style.zIndex = ++zTop; L('pop', false); }
     function select(it) { if (sel) sel.el.classList.remove('sel'); sel = it; if (sel) sel.el.classList.add('sel'); }
     function sackAt(x, y) { let best = null, bd = 1e9; for (const s of sacks) { if (s.full) continue; const r = s.el.getBoundingClientRect(); if (x >= r.left - 6 && x <= r.right + 6 && y >= r.top - 24 && y <= r.bottom + 14) { const d = Math.abs(x - (r.left + r.width / 2)); if (d < bd) { bd = d; best = s; } } } return best; }
+    function legendClear(it) {
+      // Legendarisk post: alle brev og kort på bordet forsvinner, 5 poeng per brev
+      const rest = items.filter((x) => x !== it && !x.gone); items.length = 0; if (sel) sel = null; it.gone = true;
+      [it].concat(rest).forEach((x, k) => { x.gone = true; const el = x.el; el.classList.remove('fall', 'drag', 'sel'); el.style.pointerEvents = 'none';
+        setTimeout(() => { try { const an = el.animate([{ transform: 'rotate(' + (x.rot || 0) + 'deg) scale(1)', opacity: 1, filter: 'brightness(1)' }, { transform: 'translateY(-40px) rotate(' + ((x.rot || 0) + 200) + 'deg) scale(.1)', opacity: 0, filter: 'brightness(3)' }], { duration: 520, easing: 'ease-in', fill: 'forwards' }); an.onfinish = () => el.remove(); } catch (e) { el.remove(); } }, Math.min(900, k * 25)); });
+      const pts = 25 + rest.length * 5; score += pts; sorted++; updScore();
+      stage.classList.remove('legendrush'); void stage.offsetWidth; stage.classList.add('legendrush'); setTimeout(() => stage.classList.remove('legendrush'), 1600);
+      L('gold'); L('confetti'); L('buzz', [80, 40, 80, 40, 200]);
+      bubble('Bordet ryddet! +' + pts, 'big legend', W * .2, D.y + D.h * .35, 1700);
+    }
     function tryDrop(it, s) {
+      if (it.legend) { legendClear(it); return; }
       if (s.gold || s.cc === it.cc) {
         items.splice(items.indexOf(it), 1); if (sel === it) sel = null;
         const sr = s.el.getBoundingClientRect(), stg = stage.getBoundingClientRect();
