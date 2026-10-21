@@ -20,6 +20,8 @@
     const ver = mk('p', 'gm-ver', window.__LUB_VER ? 'Versjon ' + window.__LUB_VER : '');
     top.append(h1, lead, meRow, chips, form, sw, ver);
     sec.parentElement.insertBefore(top, sec);
+    // Lubben-kort (pakker og album) ligger under Spillhallen
+    try { const tc = $('tcgSec'); if (tc) sec.after(tc); } catch (e) {}
 
     const clean = (n) => String(n || '').replace(/\s+/g, ' ').trim().slice(0, 18);
     const saveLocal = () => { try { localStorage.setItem(NKEY, JSON.stringify(PEOPLE)); } catch (e) {} };

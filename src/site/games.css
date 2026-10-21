@@ -1,6 +1,7 @@
 
 /* ---------- Spillkode: bare Spillhallen ---------- */
-html.lub-games .wrap > :not(#arcadeSec):not(#gamesTop) { display: none !important; }
+html.lub-games .wrap > :not(#arcadeSec):not(#gamesTop):not(#tcgSec) { display: none !important; }
+html.lub-games #tcgSec { display: grid !important; }
 html.lub-games #arcadeSec, html.lub-games #arcadeSec.vh { display: block !important; }
 html.lub-games .mnu, html.lub-games .mnu-btn, html.lub-games .vnav, html.lub-games .whos { display: none !important; }
 html.lub-games .wrap { padding-top: calc(18px + env(safe-area-inset-top, 0px)); gap: 18px; }
