@@ -1617,7 +1617,8 @@ canvas#c { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
 @keyframes pscpop { 0% { transform: scale(.4); opacity: 0; } 20% { transform: scale(1.1); opacity: 1; } 100% { transform: translateY(-24px); opacity: 0; } }
 .psc-stage.goldrush::after { content: ""; position: absolute; inset: 0; z-index: 280; pointer-events: none; background: radial-gradient(circle at 50% 20%, rgba(255,226,110,.7), transparent 60%); animation: pscrush 1.2s ease-out forwards; }
 @keyframes pscrush { from { opacity: 1; } to { opacity: 0; } }
-.psc-stage .ps-start, .psc-stage .ps-over { z-index: 400; background: rgba(30,20,12,.9); }
+.psc-stage .ps-start, .psc-stage .ps-over { z-index: 100000; background: rgba(30,20,12,.9); }
+.psc-stage.flood .psc-letter { pointer-events: none; will-change: transform; }
 .psc-stage .ps-start b, .psc-stage .ps-over b { color: #f6e2b8; font-family: Georgia, serif; }
 .psc-stage .ps-over .newrec { color: #3b2512 !important; font-weight: 800; padding: 2px 10px; }
 .psc-go { margin-top: 10px; background: #b8261b; color: #ffe9b0 !important; padding: 8px 16px; border-radius: 8px; font-weight: 700; animation: pscwarn .8s ease-in-out infinite alternate; }
