@@ -10,7 +10,9 @@ shim=open(D+'site/shim.js').read(); live=open(D+'site/live.js').read()
 def rep(x,y,n=1):
   global h
   assert h.count(x)==n,(h.count(x),x[:60]); h=h.replace(x,y)
-head_add=('<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b1316"><link rel="apple-touch-icon" href="icon-192.png">'
+import datetime
+VER=datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=2))).strftime('%d.%m %H:%M')
+head_add=('<script>window.__LUB_VER="'+VER+'";</script><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b1316"><link rel="apple-touch-icon" href="icon-192.png">'
   '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">'
   '<script>'+app+'\n</script><script>'+fst+'\n</script><script>'+shim+'\n</script>'
   '<script>if("serviceWorker" in navigator){var hadSW=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener("controllerchange",function(){if(hadSW&&!window.__swr){window.__swr=1;location.reload();}});addEventListener("load",function(){navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(function(r){try{r.update();}catch(e){}}).catch(function(){});});}</script>')

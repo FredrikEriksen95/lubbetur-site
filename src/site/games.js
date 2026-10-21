@@ -17,7 +17,8 @@
     const addB = mk('button', '', 'Legg til'); addB.type = 'submit';
     form.append(inp, addB);
     const sw = mk('button', 'gm-sw', 'Bytt kode / logg ut'); sw.type = 'button'; sw.onclick = () => { try { window.__lubSwitchCode && window.__lubSwitchCode(); } catch (e) {} };
-    top.append(h1, lead, meRow, chips, form, sw);
+    const ver = mk('p', 'gm-ver', window.__LUB_VER ? 'Versjon ' + window.__LUB_VER : '');
+    top.append(h1, lead, meRow, chips, form, sw, ver);
     sec.parentElement.insertBefore(top, sec);
 
     const clean = (n) => String(n || '').replace(/\s+/g, ' ').trim().slice(0, 18);

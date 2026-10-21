@@ -17,3 +17,4 @@ html.lub-games .wrap { padding-top: calc(18px + env(safe-area-inset-top, 0px)); 
 .gm-add input { flex: 1; min-width: 0; font: 16px var(--sans); padding: 11px 12px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); }
 .gm-add button { font: 700 15px var(--sans); padding: 0 16px; min-height: 44px; border: 0; background: var(--flap); color: var(--flap-ink); cursor: pointer; }
 .gm-sw { justify-self: start; background: none; border: 0; padding: 4px 0; color: var(--dim); text-decoration: underline; font: 13px var(--sans); cursor: pointer; }
+.gm-ver { margin: 0; font-size: 11px; color: var(--dim); opacity: .7; }

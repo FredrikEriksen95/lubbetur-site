@@ -1589,6 +1589,8 @@ window.LubArcade = (function () {
     turBoard(w);
     recBoard(w);
     medalBoard(w);
+    if (window.__lubSwitchCode) { const lo = h('div', 'panel ah-logout'); lo.append(h('span', 'lbl', 'Innlogging'), h('p', 'fine', 'Vil du bytte mellom gjengkoden og spillkoden, eller logge inn på nytt?'), btn('Logg inn på nytt / bytt kode', 'ghost', () => { askConfirm('Logge inn på nytt?', 'Du kommer tilbake til kodeskjermen. Rekorder og kort ligger trygt i databasen.', 'Logg inn på nytt', () => { try { window.__lubSwitchCode(); } catch (e) {} }); })); w.append(lo); }
+    if (window.__LUB_VER) w.append(h('p', 'fine ah-ver', 'Versjon ' + window.__LUB_VER));
     view.body.scrollTop = 0;
   }
 

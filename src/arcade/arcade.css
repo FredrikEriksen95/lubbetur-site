@@ -950,3 +950,4 @@
 .arc-ov.soft { background: rgba(10,10,30,.25); backdrop-filter: none; }
 .tur-r .tn { display: grid; } .tur-r .tn small { color: #8fa6ae; font-size: 11px; }
 .tur .rec-r.nc { opacity: .5; }
+.ah-ver { text-align: center; opacity: .5; font-size: 11px; }
