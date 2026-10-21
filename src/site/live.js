@@ -3,7 +3,9 @@
     if (!window.__LUB_STANDALONE) return;
     const waitDb = (fn) => { const t = setInterval(() => { if (typeof LIVE !== 'undefined' && LIVE && LIVE.db) { clearInterval(t); fn(LIVE.db); } }, 700); };
     // Når noen med koden åpner appen etter opplåsingstidspunktet, låses den opp for alle
-    waitDb((db) => { try { db.doc('reveal/key').onSnapshot((s) => { const d = s && s.exists ? s.data() : null; if (d && d.k && !DATA && Date.now() >= REVEAL_AT) unlock(d.k, true); }, () => {}); } catch (e) {} });
+    waitDb((db) => { try { db.doc('reveal/key').onSnapshot((s) => { const d = s && s.exists ? s.data() : null; if (d && d.k && Date.now() >= REVEAL_AT) { try { if (localStorage.getItem('lubbetur-kode') !== JSON.stringify(d.k)) localStorage.setItem('lubbetur-kode', JSON.stringify(d.k)); } catch (e) {} if (!DATA) unlock(d.k, true); } }, () => {}); } catch (e) {} });
+    // Uten nett: når avsløringen har skjedd, er Spillhallen åpen uansett (koden huskes neste gang telefonen er på nett)
+    try { if (Date.now() >= REVEAL_AT) setTimeout(() => { try { window.LubArcade && LubArcade.unlock(); } catch (e) {} }, 300); } catch (e) {}
     window.__lubShareKey = () => { if (Date.now() < REVEAL_AT || !PASS) return; waitDb((db) => { db.doc('reveal/key').get().then((s) => { if (!(s && s.exists)) return db.doc('reveal/key').set({ k: PASS, at: Date.now() }); }).catch(() => {}); }); };
     const SYM = [['clearsky', 'Sol'], ['fair', 'Lettskyet'], ['partlycloudy', 'Delvis skyet'], ['cloudy', 'Skyet'], ['fog', 'Tåke'], ['heavyrainshowers', 'Kraftige regnbyger'], ['lightrainshowers', 'Lette regnbyger'], ['rainshowers', 'Regnbyger'], ['heavyrain', 'Kraftig regn'], ['lightrain', 'Lett regn'], ['rain', 'Regn'], ['sleetshowers', 'Sluddbyger'], ['sleet', 'Sludd'], ['snowshowers', 'Snøbyger'], ['heavysnow', 'Kraftig snø'], ['lightsnow', 'Lett snø'], ['snow', 'Snø'], ['thunder', 'Torden']];
     const symTxt = (c) => { c = String(c || '').replace(/_(day|night|polartwilight)$/, ''); const f = SYM.find(([k]) => c.includes(k)); return f ? f[1] : 'Skiftende'; };
