@@ -10,7 +10,7 @@
     const DAYS = ['Søn', 'Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør'];
     async function fetchWx(db) {
       if (!DATA || !Array.isArray(DATA.geo)) return;
-      try { const s = await db.doc('vaer/dest').get(); const d = s && s.exists ? s.data() : null; if (d && Date.now() - (Date.parse(d.at) || 0) < 3 * 3600e3) return; } catch (e) {}
+      try { const s = await db.doc('vaer/dest').get(); const d = s && s.exists ? s.data() : null; if (d && Date.now() - (Date.parse(d.at) || 0) < 3600e3) return; } catch (e) {}
       const r = await fetch('https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=' + DATA.geo[0].toFixed(3) + '&lon=' + DATA.geo[1].toFixed(3));
       if (!r.ok) return; const j = await r.json(); const ts = (j.properties && j.properties.timeseries) || [];
       const by = {};
@@ -22,11 +22,19 @@
     }
     async function fetchFx(db) {
       if (!DATA || !DATA.cur) return; const k = 'kurs/' + DATA.cur.toLowerCase();
-      try { const s = await db.doc(k).get(); const d = s && s.exists ? s.data() : null; if (d && Date.now() - (Date.parse(d.at) || 0) < 4 * 3600e3) return; } catch (e) {}
-      const r = await fetch('https://api.frankfurter.app/latest?from=' + encodeURIComponent(DATA.cur) + '&to=NOK'); if (!r.ok) return; const j = await r.json(); const v = j && j.rates && j.rates.NOK;
+      try { const s = await db.doc(k).get(); const d = s && s.exists ? s.data() : null; if (d && Date.now() - (Date.parse(d.at) || 0) < 2 * 3600e3) return; } catch (e) {}
+      // frankfurter.app er flyttet; prøv flere gratis kilder i tur og orden
+      const cur = DATA.cur.toUpperCase(), lc = cur.toLowerCase(); let v = null;
+      const tries = [
+        async () => { const j = await (await fetch('https://api.frankfurter.dev/v1/latest?base=' + cur + '&symbols=NOK')).json(); return j && j.rates && j.rates.NOK; },
+        async () => { const j = await (await fetch('https://open.er-api.com/v6/latest/' + cur)).json(); return j && j.rates && j.rates.NOK; },
+        async () => { const j = await (await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/' + lc + '.json')).json(); return j && j[lc] && j[lc].nok; }
+      ];
+      for (const t of tries) { try { const x = Number(await t()); if (x > 0 && x < 10) { v = x; break; } } catch (e) {} }
       if (v > 0) await db.doc(k).set({ rate: v, at: new Date().toISOString() });
     }
     window.__lubFetchLive = () => { if (!navigator.onLine) return; waitDb((db) => { fetchWx(db).catch(() => {}); fetchFx(db).catch(() => {}); }); };
-    setInterval(() => { if (DATA) window.__lubFetchLive(); }, 30 * 60e3);
+    setInterval(() => { if (DATA) window.__lubFetchLive(); }, 20 * 60e3);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && DATA) setTimeout(() => window.__lubFetchLive(), 1500); });
   })();
 
