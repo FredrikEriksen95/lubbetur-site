@@ -81,7 +81,7 @@ window.LubArcade = (function () {
       const hubRe = () => { if (view && !S && !setupState) renderHub(); };
       try { NET.db.collection('rekord').onSnapshot((q) => { RECS = (q.docs || []).map((d) => d.data()).filter((x) => x && x.g && x.name); hubRe(); }, () => {}); } catch (e) {}
       try { NET.db.collection('quiz').onSnapshot((q) => { QUIZZES = (q.docs || []).map((d) => d.data()).filter((x) => x && x.id && !x.deleted && Array.isArray(x.qs)); const gone = new Set((q.docs || []).map((d) => d.data()).filter((x) => x && x.deleted).map((x) => x.id)); if (gone.size) memSet('myQuiz', (mem.myQuiz || []).filter((x) => !gone.has(x.id))); if (view && setupState && setupState.g === 'qz' && !EDIT && !(S && S.ph !== 'closed' && !(S.st && S.st.end))) renderSetup(); }, () => {}); } catch (e) {}
-      try { NET.db.collection('tur').onSnapshot((q) => { TUR = (q.docs || []).map((d) => d.data()).filter((x) => x && x.cat && x.name); (mem.turQ || []).forEach((e) => turApply(e)); if (!turLoaded) { turLoaded = true; setTimeout(turFlush, 500); } hubRe(); }, () => {}); } catch (e) {}
+      try { NET.db.collection('tur').onSnapshot((q) => { TUR = (q.docs || []).map((d) => d.data()).filter((x) => x && x.cat && x.name); (mem.turQ || []).forEach((e) => turApply(e)); if (!turLoaded) { turLoaded = true; setTimeout(turFlush, 500); } medPsFix(); hubRe(); }, () => {}); } catch (e) {}
       try { NET.db.collection('seier').onSnapshot((q) => { WINS = (q.docs || []).map((d) => d.data()).filter((x) => x && x.name); hubRe(); }, () => {}); } catch (e) {}
     }
     renderSection();
@@ -1519,7 +1519,7 @@ window.LubArcade = (function () {
     kb: { u: 'kabaler som gikk opp', u1: 'kabal som gikk opp', t: [1, 5, 15, 40], cum: true },
     ld: { u: 'seire i Bløffterninger', u1: 'seier i Bløffterninger', t: [1, 5, 15, 30], cum: true },
     sb: { u: 'seire i Senke slagskip', u1: 'seier i Senke slagskip', t: [1, 3, 10, 25], cum: true },
-    ps: { u: 'poeng på én vakt', t: [250, 700, 1500, 3000] },
+    ps: { u: 'poeng på én vakt', t: [1000, 3000, 6000, 10000] },
     sn: { u: 'epler på én runde', t: [10, 25, 45, 70] },
     ff: { u: 'fjell på én tur', t: [5, 15, 30, 50] },
     st: { u: 'etasjer i ett tårn', t: [10, 25, 45, 70] },
@@ -1546,6 +1546,15 @@ window.LubArcade = (function () {
     if (g === 'ps') return st.scores[me.id] || 0;
     if (S.pl.length !== 1) return null;
     const r = soloRec(); return r ? r.v : null;
+  }
+  // Postsortereren fikk nye grenser (legendarisk = 10 000). Gamle medaljer regnes om én gang, og beste vakt på turens toppliste teller.
+  function medPsFix() {
+    try {
+      const all = mem.medal || {}, was = all.ps || 0; let lv = was;
+      if (!mem.medPs2) { const oldT = [250, 700, 1500, 3000]; lv = lv ? MED.ps.t.filter((x) => oldT[lv - 1] >= x).length : 0; memSet('medPs2', 1); }
+      const r = TUR.find((x) => x.cat === 'ps' && x.name === who()); if (r) lv = Math.max(lv, MED.ps.t.filter((x) => r.v >= x).length);
+      if (lv !== was) { all.ps = lv; memSet('medal', all); }
+    } catch (e) {}
   }
   function checkMedals() {
     UI.medal = null; const D2 = MED[S.g]; if (!D2) return;
