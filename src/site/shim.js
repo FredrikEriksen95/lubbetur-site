@@ -129,3 +129,5 @@
   };
   window.claude = Object.freeze({ use: (n) => gateReady.then(() => { if (!room && fs) mkRoom(); return n === 'db' ? db : n === 'room' ? room : n === 'user' ? user : null; }) });
 })();
+// Ingen zoom på iPhone: stopp knipe-zoom (dobbelttrykk stoppes med touch-action i CSS)
+try { ['gesturestart', 'gesturechange'].forEach((t) => document.addEventListener(t, (e) => { if (!(e.target && e.target.closest && e.target.closest('.docv'))) e.preventDefault(); }, { passive: false })); } catch (e) {}
