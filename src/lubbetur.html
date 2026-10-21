@@ -616,6 +616,12 @@ canvas.globe { cursor: grab; }
 canvas#c { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
 @media (max-width: 480px) { .now { grid-template-columns: 1fr; } .ev { grid-template-columns: 64px 1fr; } .calc { grid-template-columns: 1fr; } .calc .eq { display: none; } }
 @media (prefers-reduced-motion: reduce) { .wrap > *, .bp, .eq-bars i, .doc .caret { animation: none !important; } .cell.flip, .stamp.show, .shake { animation: none; } .bar i, .box svg { transition: none; } }
+.onbar { position: fixed; right: max(10px, env(safe-area-inset-right, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 8450; display: flex; align-items: center; gap: 4px; padding: 6px 8px; background: rgba(11,26,33,.88); border: 1px solid rgba(255,255,255,.12); border-radius: 22px !important; cursor: pointer; backdrop-filter: blur(4px); }
+.onbar i { width: 24px; height: 24px; display: grid; place-items: center; font: 700 12px var(--sans); font-style: normal; color: #6f8f99; background: rgba(255,255,255,.06); border-radius: 50% !important; }
+.onbar i.on { color: #04110c; background: #2bff88; box-shadow: 0 0 0 2px rgba(43,255,136,.35); }
+.onbar i.me { box-shadow: 0 0 0 2px #fff; }
+.onbar b { margin-left: 2px; font: 700 12px var(--mono); color: #2bff88; min-width: 10px; }
+.onbar[hidden] { display: none; }
 </style>
 
 <canvas id="bg" aria-hidden="true"></canvas>
@@ -10704,6 +10710,21 @@ window.LubArcade = (function () {
 
   // Lobby
   const lobby = $('lobby');
+  // Liten stripe nede til høyre som alltid viser hvem som er pålogget (også inne i Spillhallen)
+  const obar = document.createElement('button'); obar.type = 'button'; obar.className = 'onbar'; obar.setAttribute('aria-label', 'Hvem er pålogget');
+  obar.onclick = () => {
+    const names = [...obar.querySelectorAll('i')].filter((i) => i.classList.contains('on')).map((i) => i.title.replace(/ er pålogget$/, ''));
+    if (document.querySelector('.ar') || window.__LUB_GAMES || !window.LubViews) { toast(names.length ? 'Pålogget nå: ' + names.join(', ') : 'Ingen andre er pålogget nå.'); return; }
+    try { LubViews.go($('liveSec')); } catch (e) {}
+  };
+  document.body.append(obar);
+  function onBar(on) {
+    obar.textContent = '';
+    const list = PEOPLE.slice(); if (!list.length) { obar.hidden = true; return; } obar.hidden = false;
+    list.forEach((n) => { const i = document.createElement('i'); i.textContent = (n[0] || '?').toUpperCase(); i.title = n + (on.has(n) ? ' er pålogget' : ' er ikke pålogget'); if (on.has(n)) i.className = n === curWho ? 'on me' : 'on'; obar.append(i); });
+    const c = document.createElement('b'); c.textContent = String(list.filter((n) => on.has(n)).length); obar.append(c);
+    obar.setAttribute('aria-label', 'Pålogget nå: ' + (list.filter((n) => on.has(n)).join(', ') || 'ingen'));
+  }
   function renderLobby() {
     const on = new Set(), others = LIVE.peers.filter((p) => p.kind === 'viewer');
     others.forEach((p) => { const w = okWho(p.presence && p.presence.who); if (w) on.add(w); });
@@ -10718,6 +10739,7 @@ window.LubArcade = (function () {
       b.onclick = () => { if (n !== curWho) { pickWho(n); toast('Sjekket inn som ' + n + '.'); } };
       lobby.append(b);
     });
+    onBar(on);
     const cnt = others.length;
     $('liveCount').textContent = LIVE.room ? (cnt <= 1 ? 'Bare deg her nå' : cnt + ' har siden oppe nå') : 'Velg hvem du er';
   }
@@ -11138,7 +11160,7 @@ window.LubArcade = (function () {
     timers.push(setTimeout(end, 16000));
   }
 
-  try { window.LubArcade && LubArcade.mount({ el: $('arcadeSec'), people: PEOPLE, who: () => curWho, setWho: (n) => pickWho(n), openPacks: () => { if (!window.__LUB_GAMES) { try { window.LubViews && LubViews.show('kort'); } catch (e) {} } setTimeout(() => { try { $('packBtn').click(); } catch (e) {} }, window.__LUB_GAMES ? 120 : 220); }, openAlbum: () => { if (!window.__LUB_GAMES) { try { window.LubViews && LubViews.show('kort', true); } catch (e) {} } setTimeout(() => { try { $('coll').scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }, 200); } }); } catch (e) {}
+  try { window.LubArcade && LubArcade.mount({ el: $('arcadeSec'), people: PEOPLE, who: () => curWho, setWho: (n) => pickWho(n), openPacks: window.__LUB_GAMES ? () => { setTimeout(() => { try { $('packBtn').click(); } catch (e) {} }, 120); } : null, openAlbum: window.__LUB_GAMES ? () => { setTimeout(() => { try { $('coll').scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }, 200); } : null }); } catch (e) {}
 
 
   // ---------- Meny og visninger: én del av appen om gangen ----------
