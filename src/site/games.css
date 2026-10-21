@@ -1,0 +1,19 @@
+
+/* ---------- Spillkode: bare Spillhallen ---------- */
+html.lub-games .wrap > :not(#arcadeSec):not(#gamesTop) { display: none !important; }
+html.lub-games #arcadeSec, html.lub-games #arcadeSec.vh { display: block !important; }
+html.lub-games .mnu, html.lub-games .mnu-btn, html.lub-games .vnav, html.lub-games .whos { display: none !important; }
+html.lub-games .wrap { padding-top: calc(18px + env(safe-area-inset-top, 0px)); gap: 18px; }
+.gm-top { display: grid; gap: 12px; background: var(--card); border: 1px solid var(--line); padding: 18px; clip-path: var(--cut); }
+.gm-top h1 { margin: 0; font-family: var(--serif); font-size: 30px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink); }
+.gm-lead { margin: 0; color: var(--dim); }
+.gm-me { font-size: 15px; color: var(--dim); }
+.gm-me b { color: var(--signal); font-size: 17px; }
+.gm-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.gm-chips button { font: 600 15px var(--sans); padding: 10px 14px; min-height: 44px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; }
+.gm-chips button.on { background: var(--signal); border-color: var(--signal); color: #1b140e; }
+.gm-empty { color: var(--dim); font-size: 14px; }
+.gm-add { display: flex; gap: 8px; margin-top: 4px; }
+.gm-add input { flex: 1; min-width: 0; font: 16px var(--sans); padding: 11px 12px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); }
+.gm-add button { font: 700 15px var(--sans); padding: 0 16px; min-height: 44px; border: 0; background: var(--flap); color: var(--flap-ink); cursor: pointer; }
+.gm-sw { justify-self: start; background: none; border: 0; padding: 4px 0; color: var(--dim); text-decoration: underline; font: 13px var(--sans); cursor: pointer; }
