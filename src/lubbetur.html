@@ -8320,6 +8320,8 @@ window.LubArcade = (function () {
     const start = h('div', 'ps-start'); start.append(h('b', '', 'Postsorteringen'), h('span', '', 'Brevene ramler ned på sorteringsbordet. Legg dem gjerne i bunker per land mens du venter. Nye sekker kommer med jevne mellomrom og dytter båndet ett hakk. Fyll sekkene med brev som har samme flagg, så blir de hentet. Trykk på et brev, så går det rett i den ytterste sekken med samme flagg. Du kan også dra brevene rundt på bordet eller opp i en bestemt sekk. Gullkort fyller en sekk med én gang. Gullsekken tar alle brev og fyller alle sekkene på båndet. Faller en sekk utfor kanten, er vakta over.'), h('span', 'psc-go', 'Trykk for å starte')); stage.append(start);
     let W = 360, H = 600, beltY = 140, D = { x: 8, y: 200, w: 344, h: 280 };
     const LIMIT = 20, LW = 108, LH = 60;
+    // Legendarisk post: kommer én gang per vakt, et tilfeldig sted mellom 8 000 og 9 500 poeng
+    const legendAt = 8000 + Math.floor(Math.random() * 1500); let legendDone = false;
     let level = 1, sorted = 0, score = 0, shown = 0, fullN = 0, over = false, running = false, nextLetter = 0, nextBurst = 0, nextStep = 0, raf = 0, zTop = 30, SLOTS = 5, SW = 64, SKW = 60, gearA = 0;
     const sacks = []; const items = []; let sel = null, dragIt = null;
     // Gradvis vanskeligere: flere og flere land; tiden mellom sekkene krymper bare litt, og sakte
@@ -8405,8 +8407,8 @@ window.LubArcade = (function () {
       if (lack.length && Math.random() < .7) { const tot = lack.reduce((t, k) => t + need[k], 0); let r = Math.random() * tot; cc = lack.find((k) => (r -= need[k]) < 0) || lack[0]; }
       else cc = act[rnd(act.length)];
       const [x, y] = spot(false);
-      // Legendarisk post: svært sjelden (ca. 1 av 250 brev etter 25 sorterte, maks én om gangen). Sorteres den, ryddes hele bordet.
-      if (sorted >= 25 && !items.some((x) => x.legend) && Math.random() < .004) { newItem(cc, false, x, y, 0, false, true); L('stab', [1046.5, 1318.5, 1568, 2093, 2637], .5, .07); L('buzz', [40, 40, 40, 40, 160]); bubble('Legendarisk post!', 'big legend', x - 20, y - 26, 1500); }
+      // Legendarisk post: bare én per vakt, når poengsummen passerer legendAt. Sorteres den, ryddes hele bordet.
+      if (!legendDone && score >= legendAt) { legendDone = true; newItem(cc, false, x, y, 0, false, true); L('stab', [1046.5, 1318.5, 1568, 2093, 2637], .5, .07); L('buzz', [40, 40, 40, 40, 160]); bubble('Legendarisk post!', 'big legend', x - 20, y - 26, 1500); }
       else { const g = sorted >= 8 && Math.random() < .02; newItem(cc, !g && Math.random() < .2, x, y, 0, g); if (g) L('stab', [1318.5, 1568, 2093], .35, .05); }
       L('noise', .18, 'bandpass', 1400, 500, .01, .12, 1.2); setTimeout(() => L('pop', false), 380);
       check();
