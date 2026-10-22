@@ -80,6 +80,24 @@
   }
   const db = fs ? { doc: docRef, collection: colRef } : null;
 
+  // Feilsøking: hver åpning logger enhet, feil og når siden skjules/lukkes, så vi ser hvorfor appen starter på nytt
+  (function diag() {
+    if (!fs) return;
+    try {
+      const ref = fs.collection(P('diag')).doc(TAB), t0 = Date.now(), evs = []; let pend = 0;
+      const nm = () => { try { return JSON.parse(localStorage.getItem('lubbetur-hvem') || 'null'); } catch (e) { return null; } };
+      const flush = () => ref.set({ cid: CID, who: nm(), ua: String(navigator.userAgent).slice(0, 180), sa: !!(navigator.standalone || (matchMedia && matchMedia('(display-mode: standalone)').matches)), t0, last: Date.now(), ver: window.__LUB_VER || '', ev: JSON.stringify(evs) }).catch(() => {});
+      const push = (k, v) => { evs.push([Math.round((Date.now() - t0) / 1000), k, String(v == null ? '' : v).slice(0, 160)]); if (evs.length > 40) evs.shift(); clearTimeout(pend); pend = setTimeout(flush, 1200); };
+      push('start', (document.referrer ? 'ref ' : '') + 'sw:' + !!(navigator.serviceWorker && navigator.serviceWorker.controller) + ' nav:' + ((performance.getEntriesByType && (performance.getEntriesByType('navigation')[0] || {}).type) || '?'));
+      addEventListener('error', (e) => push('err', (e.message || '') + ' @' + (e.lineno || '')));
+      addEventListener('unhandledrejection', (e) => push('rej', e.reason && (e.reason.message || e.reason)));
+      document.addEventListener('visibilitychange', () => push('vis', document.visibilityState));
+      addEventListener('pagehide', (e) => { push('pagehide', e.persisted); flush(); });
+      addEventListener('pageshow', (e) => { if (e.persisted) push('pageshow', 'bfcache'); });
+      setInterval(() => { if (document.hidden) return; const ar = document.querySelector('.ar'); ref.update({ last: Date.now(), ov: ar ? ((ar.querySelector('.ar-h') || {}).textContent || 'spill').slice(0, 60) : '' }).catch(() => {}); }, 10000);
+    } catch (e) {}
+  })();
+
   // Sanntid: hendelser og hvem som er her, via Firestore
   let room = null;
   const mkRoom = () => {
