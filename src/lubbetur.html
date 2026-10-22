@@ -455,6 +455,7 @@ h2 { text-transform: uppercase; letter-spacing: .06em; font-size: 20px; }
 .toasts { z-index: 8600 !important; }
 .deck .fc .img, .deck .fc img, .deck .fc svg { pointer-events: none; -webkit-user-drag: none; user-select: none; }
 @media (prefers-reduced-motion: reduce) { .deck .pile .fc, .deck .pile .fc.arrive, .deck .pile .fc.charged, .deck .hint .sw, .deck .sum .fc { animation: none !important; transition: none !important; } }
+html.lub-cov .wrap *, html.lub-cov .wrap *::before, html.lub-cov .wrap *::after { animation-play-state: paused !important; }
 canvas#bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 .wrap { position: relative; z-index: 1; }
 .wrap > * { animation: rise .7s cubic-bezier(.2,.8,.2,1) both; }
@@ -10291,9 +10292,11 @@ window.LubArcade = (function () {
     addEventListener('resize', size);
     addEventListener('pointermove', (e) => { tx = e.clientX; ty = e.clientY; });
     document.addEventListener('visibilitychange', () => { run = !document.hidden; if (run && !reduce) requestAnimationFrame(loop); });
+    let base = '', hot = '', colAt = -1e9, lastF = 0, lastMove = 0;
+    addEventListener('pointermove', () => { lastMove = performance.now(); }, { passive: true });
+    const OV = '.ar, .deck, .fid, .walk, .lw, .bio, .term, .docv, .modal, .mnu.on';
     function draw(time) {
-      const cs = getComputedStyle(document.documentElement);
-      const base = cs.getPropertyValue('--sage').trim(), hot = cs.getPropertyValue('--signal').trim();
+      if (time - colAt > 3000 || !base) { const cs = getComputedStyle(document.documentElement); base = cs.getPropertyValue('--sage').trim(); hot = cs.getPropertyValue('--signal').trim(); colAt = time; }
       g.clearRect(0, 0, W, H);
       const S = 44, R = 150, sweep = ((time / 9000) % 1) * (W + 300) - 150;
       for (let y = S / 2; y < H; y += S) for (let x = S / 2; x < W; x += S) {
@@ -10307,7 +10310,12 @@ window.LubArcade = (function () {
       }
       g.globalAlpha = 1;
     }
-    function loop(now) { if (!run) return; mx += (tx - mx) * .12; my += (ty - my) * .12; draw(now - t0); requestAnimationFrame(loop); }
+    function loop(now) {
+      if (!run) return; requestAnimationFrame(loop);
+      const fast = now - lastMove < 1500, gap = fast ? 33 : 66; if (now - lastF < gap) return; lastF = now;
+      const cov = !!document.querySelector(OV); document.documentElement.classList.toggle('lub-cov', cov); if (cov) return;
+      mx += (tx - mx) * .25; my += (ty - my) * .25; draw(now - t0);
+    }
     size(); if (!reduce) requestAnimationFrame(loop);
   })();
 
@@ -10709,7 +10717,10 @@ window.LubArcade = (function () {
   ['touchend', 'click', 'keydown'].forEach((ev) => document.addEventListener(ev, () => {
     if (snd.on && (!snd.ctx || snd.ctx.state !== 'running' || !silentEl || silentEl.paused)) sUnlock();
   }, { capture: true, passive: true }));
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && snd.on && snd.ctx && snd.ctx.state !== 'running') sCtx(); });
+  // Strømsparing: når appen ikke er på skjermen, stoppes det stille lydsporet og lydmotoren, så telefonen ikke holder appen våken i bakgrunnen
+  const sSleep = () => { sKeepAlive(false); try { if (snd.ctx && snd.ctx.state === 'running') { const pr = snd.ctx.suspend(); if (pr && pr.catch) pr.catch(() => {}); } } catch (e) {} };
+  document.addEventListener('visibilitychange', () => { if (document.hidden) sSleep(); else if (snd.on) sUnlock(); });
+  addEventListener('pagehide', sSleep); addEventListener('blur', () => { setTimeout(() => { if (document.hidden) sSleep(); }, 300); });
   function sTick() {
     if (!snd || !snd.on || !snd.atBoard) return; const now = performance.now(); if (now - snd.last < 28) return; snd.last = now;
     const c = sCtx(); if (!c) return; const b = c.createBuffer(1, 400, c.sampleRate), d = b.getChannelData(0);

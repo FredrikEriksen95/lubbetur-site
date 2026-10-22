@@ -15,6 +15,8 @@
   try {
     firebase.initializeApp(CFG);
     fs = firebase.firestore();
+    // Strømsparing: koble fra serveren når appen har vært ute av skjermen i 20 sekunder, og koble til igjen straks den vises
+    try { let offT = 0, off = false; document.addEventListener('visibilitychange', () => { clearTimeout(offT); if (document.hidden) offT = setTimeout(() => { if (document.hidden) { off = true; fs.disableNetwork().catch(() => {}); } }, 20000); else if (off) { off = false; fs.enableNetwork().catch(() => {}); } }); } catch (e) {}
     // Ingen lokal database-kopi: den gjorde appen treg på iPhone og kunne vise gammel spilltilstand
   } catch (e) { fs = null; }
   // ---------- Gjengkode: dataene ligger under en sti som bare koden gir ----------
