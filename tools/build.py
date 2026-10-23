@@ -30,7 +30,20 @@ gcss=open(D+'site/games.css').read()
 rep("</style>"+head_add, gcss+"</style>"+head_add)
 O=R+'public/'
 os.makedirs(O,exist_ok=True)
-open(O+'index.html','w').write(h)
-for f in ['sw.js','manifest.webmanifest','icon-192.png','icon-512.png']:
+# Dokumentsidene flyttes ut av index.html til egne filer (lastes først når de åpnes) – gjør appen lett nok til at iPhone ikke kaster den ut
+import json, shutil
+m=re.search(r"\n  const SEALED_DOCS = (\{.*?\});", h)
+DOCS=[]
+if m:
+  sd=json.loads(m.group(1)); shutil.rmtree(O+'docs', ignore_errors=True); os.makedirs(O+'docs')
+  for k,v in sd['d'].items():
+    fn=re.sub(r'[^A-Za-z0-9_.-]','_',k)
+    assert fn==k,k
+    open(O+'docs/'+k+'.json','w').write(json.dumps(v,separators=(',',':'))); DOCS.append('./docs/'+k+'.json')
+  h=h[:m.start()]+"\n  const SEALED_DOCS = "+json.dumps({'salt':sd['salt'],'iter':sd['iter'],'u':'docs/'},separators=(',',':'))+";"+h[m.end():]
+for f in ['manifest.webmanifest','icon-192.png','icon-512.png']:
   open(O+f,'wb').write(open(D+'site/'+f,'rb').read())
+open(O+'index.html','w').write(h)
+sw=open(D+'site/sw.js').read(); assert 'const DOCS = [];' in sw
+open(O+'sw.js','w').write(sw.replace('const DOCS = [];','const DOCS = '+json.dumps(DOCS)+';'))
 print('ok',len(h))

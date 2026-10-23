@@ -1,7 +1,8 @@
 // Lubbetur: frakoblet bruk. Siden hentes fra nettet først (ny versjon med en gang), og fra hurtiglageret når nettet mangler.
 // Spar data: siden sjekkes mot serveren hver gang (no-cache), men lastes bare ned på nytt når den faktisk er endret.
 const C = 'lubbetur-v2';
-self.addEventListener('install', (e) => { e.waitUntil(caches.open(C).then((c) => c.addAll(['./index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'])).then(() => self.skipWaiting())); });
+const DOCS = ["./docs/A0_Ebillett_Oslo.json", "./docs/A_Fly_Oslo_XRTZQG.json", "./docs/B0_Ebillett_Bergen.json", "./docs/B_Fly_Bergen_XRS4RG.json", "./docs/B2_Icelandair_tidsendring.json", "./docs/C2_Leilighet_Hotels.com.json", "./docs/C1_Leilighet_Heimaleiga.json", "./docs/D_Leiebil_CarJet.json", "./docs/E_BlueLagoon.json", "./docs/F_Grillmarkadurinn.json"];
+self.addEventListener('install', (e) => { e.waitUntil(caches.open(C).then((c) => c.addAll(['./index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png']).then(() => c.addAll(DOCS).catch(() => {}))).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== C).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {
   const u = new URL(e.request.url);

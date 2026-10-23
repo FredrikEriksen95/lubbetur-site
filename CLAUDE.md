@@ -18,7 +18,9 @@ Netlify-siden https://lubbetur.netlify.app publiseres automatisk fra `public/` p
 5. Claude-versjonen: publiser `src/lubbetur.html` til artifaktet https://claude.ai/code/artifact/ccf8adbf-4252-4d05-9945-eb815b092ab5 (les det først, og ikke send `capabilities`).
 
 ## Harde regler
-- Reisemålet skal ALDRI stå i klartekst noe sted. Det ligger bare i de krypterte blokkene (`SEALED`, `SEALED_ISL`).
+- Reisemålet skal ALDRI stå i klartekst noe sted. Det ligger bare i de krypterte blokkene (`SEALED`, `SEALED_DOCS`, `SEALED_ISL`).
+- Dokumentsidene (bookingbilder) ligger kryptert per dokument i `SEALED_DOCS` og lastes først når de åpnes. `tools/build.py` flytter dem ut til `public/docs/<nøkkel>.json` (Netlify), så index.html holder seg liten nok til at iPhone ikke kaster appen ut av minnet.
+- Netlify Personal: hver publisering koster 15 kreditter (1 000/mnd). Samle endringer og push sjelden.
 - `const REVEAL_KEY = null;` i `src/lubbetur.html` skal stå urørt (en planlagt oppgave endrer Claude-versjonen).
 - Ikke legg koder (turkode, gjengkode, spillkode, adminpassord) i klartekst i repoet.
 - Firestore-data ligger under `g/<sha256('lubbetur:'+kode)>/…`. Reglene i Firebase tillater bare de to kodenes hash, og utløper 2027-01-01.
